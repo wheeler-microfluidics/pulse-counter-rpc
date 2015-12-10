@@ -16,7 +16,7 @@ sys.path.insert(0, '.')
 import version
 install_distutils_tasks()
 
-DEFAULT_ARDUINO_BOARDS = ['uno']
+DEFAULT_ARDUINO_BOARDS = ['mega2560']  # uno']
 PROJECT_PREFIX = [d for d in path('.').dirs()
                   if d.joinpath('Arduino').isdir()
                   and d.name not in ('build', )][0].name
@@ -51,7 +51,7 @@ options(
                   'BaseNodeI2cHandler<Handler>',
                   'BaseNodeConfig<ConfigMessage, Address>',
                   'BaseNodeState<StateMessage>'],
-    rpc_classes=['rpc_project_template::Node'],
+    rpc_classes=['od_sensor_rpc::Node'],
     DEFAULT_ARDUINO_BOARDS=DEFAULT_ARDUINO_BOARDS,
     setup=dict(name=package_name,
                version=VERSION,

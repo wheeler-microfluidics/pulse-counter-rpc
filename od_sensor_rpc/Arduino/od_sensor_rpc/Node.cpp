@@ -1,6 +1,6 @@
 #include "Node.h"
 
-namespace rpc_project_template {
+namespace od_sensor_rpc {
 
 void Node::begin() {
   config_.set_buffer(get_buffer());
@@ -15,6 +15,10 @@ void Node::begin() {
 #endif  // #ifndef DISABLE_SERIAL
   // Set i2c clock-rate to 400kHz.
   TWBR = 12;
+  pinMode(PULSE_PIN_, INPUT);
+
+  // Attach interrupt to trigger on rising edge of `PULSE_PIN_`.
+  attachInterrupt(0, pulse_handler, RISING);
 }
 
 
@@ -27,4 +31,4 @@ void Node::set_i2c_address(uint8_t value) {
   config_._.i2c_address = address;
 }
 
-}  // namespace rpc_project_template
+}  // namespace od_sensor_rpc

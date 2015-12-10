@@ -1,4 +1,4 @@
-package rpc_project_template;
+package od_sensor_rpc;
 
 message Config {
   /* # Configuration structure #
