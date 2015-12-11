@@ -16,7 +16,7 @@ sys.path.insert(0, '.')
 import version
 install_distutils_tasks()
 
-DEFAULT_ARDUINO_BOARDS = ['mega2560']  # uno']
+DEFAULT_ARDUINO_BOARDS = ['uno']
 PROJECT_PREFIX = [d for d in path('.').dirs()
                   if d.joinpath('Arduino').isdir()
                   and d.name not in ('build', )][0].name

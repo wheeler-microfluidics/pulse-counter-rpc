@@ -54,16 +54,24 @@ public:
   typedef PacketParser<FixedPacket> parser_t;
 
   static const uint16_t BUFFER_SIZE = 128;  // >= longest property string
-  static const uint8_t PULSE_PIN_ = 2;
-
   uint8_t buffer_[BUFFER_SIZE];
+
+  static const uint16_t MUX_CHANNEL_A_PIN = 4;
+  static const uint16_t MUX_CHANNEL_B_PIN = 8;
+  int16_t PULSE_PIN_;
+  uint16_t pulse_channel_;
+
   bool pulse_count_enable_;
   uint32_t pulse_count_;
   SimpleTimer timer_;
 
   Node() : BaseNode(), BaseNodeConfig<config_t>(od_sensor_rpc_Config_fields),
-           BaseNodeState<state_t>(od_sensor_rpc_State_fields),
-           pulse_count_enable_(false), pulse_count_(0) {}
+           BaseNodeState<state_t>(od_sensor_rpc_State_fields), PULSE_PIN_(-1),
+           pulse_channel_(0), pulse_count_enable_(false), pulse_count_(0) {
+    pinMode(MUX_CHANNEL_A_PIN, OUTPUT);
+    pinMode(MUX_CHANNEL_B_PIN, OUTPUT);
+    set_pulse_channel(pulse_channel_);
+  }
 
   UInt8Array get_buffer() { return UInt8Array_init(sizeof(buffer_), buffer_); }
   /* This is a required method to provide a temporary buffer to the
@@ -89,15 +97,47 @@ public:
    * [1]: https://github.com/wheeler-microfluidics/arduino_rpc
    * [2]: https://github.com/wheeler-microfluidics/base_node_rpc
    */
-  int start_frequency_count(uint32_t delay_ms) {
+  void loop() { timer_.run(); }
+
+  void set_pulse_pin(uint8_t pulse_pin, uint8_t direction) {
+    if (PULSE_PIN_ >= 0) {
+      detachInterrupt(PULSE_PIN_);
+    }
+    PULSE_PIN_ = pulse_pin;
+    pinMode(PULSE_PIN_, INPUT);
+    attachInterrupt(PULSE_PIN_, od_sensor_rpc::pulse_handler,
+                    direction);
+  }
+  int count_pulses(uint32_t duration_ms) {
      // Disable pulse counting after duration of `delay_ms`.
-    int timer_id = timer_.setTimeout(delay_ms, &od_sensor_rpc::on_timeout);
-    pulse_count_enable_ = true;
+    int timer_id = timer_.setTimeout(duration_ms,
+                                     &od_sensor_rpc::on_timeout);
+    start_pulse_count();
     return timer_id;
   }
-  void loop() { timer_.run(); }
+  void start_pulse_count() {
+    // Reset pulse count and enable counting.
+    pulse_count_ = 0;
+    pulse_count_enable_ = true;
+  }
+  uint32_t stop_pulse_count() {
+    pulse_count_enable_ = false;
+    return pulse_count_;
+  }
   uint32_t pulse_count() const { return pulse_count_; }
   uint32_t pulse_count_enable() const { return pulse_count_enable_; }
+
+  bool set_pulse_channel(uint8_t pulse_channel) {
+    // Since pulse channel address is only two bits, max channel address is 3.
+    if (pulse_channel > 3) { return false; }
+
+    // Set multiplexer select channels based on selected channel address.
+    digitalWrite(MUX_CHANNEL_A_PIN, (pulse_channel & 0x1) ? HIGH : LOW);
+    digitalWrite(MUX_CHANNEL_B_PIN, (pulse_channel & 0x2) ? HIGH : LOW);
+    pulse_channel_ = pulse_channel;
+    return true;
+  }
+  uint8_t pulse_channel() const { return pulse_channel_; }
 };
 
 }  // namespace od_sensor_rpc
