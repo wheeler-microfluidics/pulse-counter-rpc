@@ -53,25 +53,13 @@ class Node :
 public:
   typedef PacketParser<FixedPacket> parser_t;
 
-  static const uint16_t BUFFER_SIZE = 128;  // >= longest property string
+  static const uint16_t BUFFER_SIZE = 64;  // >= longest property string
   uint8_t buffer_[BUFFER_SIZE];
 
-  static const uint16_t MUX_CHANNEL_A_PIN = 4;
-  static const uint16_t MUX_CHANNEL_B_PIN = 8;
-  int16_t PULSE_PIN_;
-  uint16_t pulse_channel_;
-
-  bool pulse_count_enable_;
-  uint32_t pulse_count_;
   SimpleTimer timer_;
 
   Node() : BaseNode(), BaseNodeConfig<config_t>(od_sensor_rpc_Config_fields),
-           BaseNodeState<state_t>(od_sensor_rpc_State_fields), PULSE_PIN_(-1),
-           pulse_channel_(0), pulse_count_enable_(false), pulse_count_(0) {
-    pinMode(MUX_CHANNEL_A_PIN, OUTPUT);
-    pinMode(MUX_CHANNEL_B_PIN, OUTPUT);
-    set_pulse_channel(pulse_channel_);
-  }
+           BaseNodeState<state_t>(od_sensor_rpc_State_fields) {}
 
   UInt8Array get_buffer() { return UInt8Array_init(sizeof(buffer_), buffer_); }
   /* This is a required method to provide a temporary buffer to the
@@ -99,45 +87,88 @@ public:
    */
   void loop() { timer_.run(); }
 
-  void set_pulse_pin(uint8_t pulse_pin, uint8_t direction) {
-    if (PULSE_PIN_ >= 0) {
-      detachInterrupt(PULSE_PIN_);
-    }
-    PULSE_PIN_ = pulse_pin;
-    pinMode(PULSE_PIN_, INPUT);
-    attachInterrupt(PULSE_PIN_, od_sensor_rpc::pulse_handler,
-                    direction);
+  bool on_config_mux_channel_a_pin_changed(uint32_t mux_channel_a_pin) {
+    // Set pin mode for MUX A address channel pin to output.
+    pinMode(mux_channel_a_pin, OUTPUT);
+    // Re-apply pulse channel since MUX pin for A address channel has changed.
+    on_state_pulse_channel_changed(state_._.pulse_channel);
+    return true;
+  }
+  bool on_config_mux_channel_b_pin_changed(uint32_t mux_channel_b_pin) {
+    // Set pin mode for MUX B address channel pin to output.
+    pinMode(mux_channel_b_pin, OUTPUT);
+    // Re-apply pulse channel since MUX pin for B address channel has changed.
+    on_state_pulse_channel_changed(state_._.pulse_channel);
+    return true;
+  }
+  bool on_state_pulse_pin_changed(int32_t old_pulse_pin, int32_t pulse_pin) {
+    set_pulse_pin(pulse_pin);
+    return true;
+  }
+  bool on_state_pulse_direction_changed() { return true; }
+  bool on_state_pulse_channel_changed(uint32_t pulse_channel) {
+    // Since pulse channel address is only two bits, max channel address is 3.
+    if (pulse_channel > 3) { return false; }
+
+    // Set multiplexer select channels based on selected channel address.
+    digitalWrite(config_._.mux_channel_a_pin,
+                 (pulse_channel & 0x1) ? HIGH : LOW);
+    digitalWrite(config_._.mux_channel_b_pin,
+                 (pulse_channel & 0x2) ? HIGH : LOW);
+    return true;
+  }
+
+  void set_pulse_pin(uint8_t pulse_pin) {
+    /* Configure the pin to count pulses on (including attaching appropriate
+     * interrupt).
+     *
+     * Args:
+     *
+     *     pulse_pin (uint8_t) : Pin to count pulses on.
+     */
+    if (state_._.pulse_pin >= 0) { detachInterrupt(state_._.pulse_pin); }
+    pinMode(pulse_pin, INPUT);
+    attachInterrupt(digitalPinToInterrupt(pulse_pin),
+                    od_sensor_rpc::pulse_handler, RISING);
   }
   int count_pulses(uint32_t duration_ms) {
-     // Disable pulse counting after duration of `delay_ms`.
+    /* Start pulse counting and start count down timer to stop pulse counting
+     * after specified duration.
+     *
+     * Args:
+     *
+     *     duration_ms (uint32_t) : Duration (in milliseconds) to activate
+     *         pulse counting.
+     *
+     * Returns:
+     *
+     *     (int) : Identifier of countdown timer assigned to trigger pulse
+     *         counting to stop.
+     */
+    // Disable pulse counting after duration of `delay_ms`.
     int timer_id = timer_.setTimeout(duration_ms,
                                      &od_sensor_rpc::on_timeout);
     start_pulse_count();
     return timer_id;
   }
   void start_pulse_count() {
-    // Reset pulse count and enable counting.
-    pulse_count_ = 0;
-    pulse_count_enable_ = true;
+    /* Reset pulse count and enable counting. */
+    state_._.pulse_count = 0;
+    state_._.has_pulse_count = true;
+    state_._.pulse_count_enable = true;
+    state_._.has_pulse_count_enable = true;
   }
   uint32_t stop_pulse_count() {
-    pulse_count_enable_ = false;
-    return pulse_count_;
+    /* Stop counting pulses.
+     *
+     * Returns:
+     *
+     *     (uint32_t) : Number of pulses counted.
+     */
+    state_._.pulse_count_enable = false;
+    state_._.has_pulse_count_enable = true;
+    return state_._.pulse_count;
   }
-  uint32_t pulse_count() const { return pulse_count_; }
-  uint32_t pulse_count_enable() const { return pulse_count_enable_; }
-
-  bool set_pulse_channel(uint8_t pulse_channel) {
-    // Since pulse channel address is only two bits, max channel address is 3.
-    if (pulse_channel > 3) { return false; }
-
-    // Set multiplexer select channels based on selected channel address.
-    digitalWrite(MUX_CHANNEL_A_PIN, (pulse_channel & 0x1) ? HIGH : LOW);
-    digitalWrite(MUX_CHANNEL_B_PIN, (pulse_channel & 0x2) ? HIGH : LOW);
-    pulse_channel_ = pulse_channel;
-    return true;
-  }
-  uint8_t pulse_channel() const { return pulse_channel_; }
 };
 
 }  // namespace od_sensor_rpc

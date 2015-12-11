@@ -15,10 +15,6 @@ void Node::begin() {
 #endif  // #ifndef DISABLE_SERIAL
   // Set i2c clock-rate to 400kHz.
   TWBR = 12;
-  pinMode(PULSE_PIN_, INPUT);
-
-  // Attach interrupt to trigger on rising edge of `PULSE_PIN_`.
-  attachInterrupt(0, pulse_handler, RISING);
 }
 
 

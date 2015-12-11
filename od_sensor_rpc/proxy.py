@@ -48,11 +48,12 @@ try:
 
                 (int) : Number of pulses counted.
             '''
-            if self.pulse_count_enable():
+            if self.state.pulse_count_enable:
                 raise IOError('Pulse count already in progress.')
-            if not self.set_pulse_channel(pulse_channel):
-                raise IOError('Invalid pulse channel (%s)' % pulse_channel)
-            self.set_pulse_pin(pulse_pin, trigger_direction)
+            if not self.update_state(pulse_channel=pulse_channel,
+                                     pulse_pin=pulse_pin,
+                                     pulse_direction=trigger_direction):
+                raise IOError('Error updating state.')
             self._count_pulses(duration_ms)
 
             # Wait for the expected duration.
@@ -62,9 +63,10 @@ try:
             start = datetime.now()
             while timeout_s == 0 or ((datetime.now() - start).total_seconds() <
                                      timeout_s):
-                if not self.pulse_count_enable():
+                state = self.state
+                if not state.pulse_count_enable:
                     # Pulse counting has finished.
-                    return self.pulse_count()
+                    return state.pulse_count
             raise RuntimeError('Timed out waiting for pulse count to '
                                'complete.')
 

@@ -21,6 +21,8 @@ message Config {
    *      optional float my_float_field = 50;
    *      optional int32 my_int_field = 51;
    */
+  optional uint32 mux_channel_a_pin = 4 [default = 4];
+  optional uint32 mux_channel_b_pin = 5 [default = 8];
 }
 
 
@@ -30,4 +32,9 @@ message State {
    * This structure contains fields that can easily be updated through the
    * `update_state` method, but are *not* saved across device resets (i.e., are
    * only stored in RAM). */
+  optional int32 pulse_pin = 1 [default = -1];
+  optional uint32 pulse_channel = 2 [default = 0];
+  optional uint32 pulse_direction = 3 [default = 3];  // default = RISING
+  optional bool pulse_count_enable = 4 [default = false];
+  optional uint32 pulse_count = 5 [default = 0];
 }
