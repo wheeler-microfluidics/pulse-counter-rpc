@@ -51,7 +51,7 @@ options(
                   'BaseNodeI2cHandler<Handler>',
                   'BaseNodeConfig<ConfigMessage, Address>',
                   'BaseNodeState<StateMessage>'],
-    rpc_classes=['od_sensor_rpc::Node'],
+    rpc_classes=['pulse_counter_rpc::Node'],
     DEFAULT_ARDUINO_BOARDS=DEFAULT_ARDUINO_BOARDS,
     setup=dict(name=package_name,
                version=VERSION,

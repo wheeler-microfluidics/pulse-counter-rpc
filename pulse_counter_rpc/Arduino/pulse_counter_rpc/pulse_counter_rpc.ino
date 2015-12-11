@@ -11,20 +11,20 @@
 #include "RPCBuffer.h"
 #include "NodeCommandProcessor.h"
 #include "BaseNodeRpc.h"
-#include "OdSensorRpc.h"
+#include "PulseCounterRpc.h"
 #include "Node.h"
 
 
-od_sensor_rpc::Node node_obj;
-od_sensor_rpc::CommandProcessor<od_sensor_rpc::Node> command_processor(node_obj);
+pulse_counter_rpc::Node node_obj;
+pulse_counter_rpc::CommandProcessor<pulse_counter_rpc::Node> command_processor(node_obj);
 
 
 void i2c_receive_event(int byte_count) { node_obj.i2c_handler_.receiver()(byte_count); }
 void serialEvent() { node_obj.serial_handler_.receiver()(Serial.available()); }
-void od_sensor_rpc::pulse_handler() {
+void pulse_counter_rpc::pulse_handler() {
   if (node_obj.state_._.pulse_count_enable) { node_obj.state_._.pulse_count++; }
 }
-void od_sensor_rpc::on_timeout() {
+void pulse_counter_rpc::on_timeout() {
   node_obj.state_._.pulse_count_enable = false;
 }
 

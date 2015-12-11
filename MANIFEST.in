@@ -6,6 +6,6 @@ include pavement.py
 include paver-minilib.zip
 include setup.py
 include SConstruct
-recursive-include od_sensor_rpc *
-recursive-exclude od_sensor_rpc *.pyc
-recursive-exclude od_sensor_rpc *.o
+recursive-include pulse_counter_rpc *
+recursive-exclude pulse_counter_rpc *.pyc
+recursive-exclude pulse_counter_rpc *.o

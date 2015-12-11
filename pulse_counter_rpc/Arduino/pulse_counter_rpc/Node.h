@@ -6,7 +6,7 @@
 #include <NadaMQ.h>
 #include <CArrayDefs.h>
 #include "RPCBuffer.h"  // Define packet sizes
-#include "OdSensorRpc/Properties.h"  // Define package name, URL, etc.
+#include "PulseCounterRpc/Properties.h"  // Define package name, URL, etc.
 #include <BaseNodeRpc/BaseNodeRpc.h>
 #include <BaseNodeRpc/BaseNode.h>
 #include <BaseNodeRpc/BaseNodeEeprom.h>
@@ -19,13 +19,13 @@
 #include <BaseNodeRpc/SerialHandler.h>
 #include <pb_validate.h>
 #include <pb_eeprom.h>
-#include "od_sensor_rpc_config_validate.h"
-#include "od_sensor_rpc_state_validate.h"
+#include "pulse_counter_rpc_config_validate.h"
+#include "pulse_counter_rpc_state_validate.h"
 #include "SimpleTimer.h"
-#include "OdSensorRpc/config_pb.h"
+#include "PulseCounterRpc/config_pb.h"
 
 
-namespace od_sensor_rpc {
+namespace pulse_counter_rpc {
 const size_t FRAME_SIZE = (3 * sizeof(uint8_t)  // Frame boundary
                            - sizeof(uint16_t)  // UUID
                            - sizeof(uint16_t)  // Payload length
@@ -33,9 +33,9 @@ const size_t FRAME_SIZE = (3 * sizeof(uint8_t)  // Frame boundary
 
 class Node;
 
-typedef nanopb::EepromMessage<od_sensor_rpc_Config,
+typedef nanopb::EepromMessage<pulse_counter_rpc_Config,
                               config_validate::Validator<Node> > config_t;
-typedef nanopb::Message<od_sensor_rpc_State,
+typedef nanopb::Message<pulse_counter_rpc_State,
                         state_validate::Validator<Node> > state_t;
 void pulse_handler();
 void on_timeout();
@@ -58,8 +58,8 @@ public:
 
   SimpleTimer timer_;
 
-  Node() : BaseNode(), BaseNodeConfig<config_t>(od_sensor_rpc_Config_fields),
-           BaseNodeState<state_t>(od_sensor_rpc_State_fields) {}
+  Node() : BaseNode(), BaseNodeConfig<config_t>(pulse_counter_rpc_Config_fields),
+           BaseNodeState<state_t>(pulse_counter_rpc_State_fields) {}
 
   UInt8Array get_buffer() { return UInt8Array_init(sizeof(buffer_), buffer_); }
   /* This is a required method to provide a temporary buffer to the
@@ -129,7 +129,7 @@ public:
     if (state_._.pulse_pin >= 0) { detachInterrupt(state_._.pulse_pin); }
     pinMode(pulse_pin, INPUT);
     attachInterrupt(digitalPinToInterrupt(pulse_pin),
-                    od_sensor_rpc::pulse_handler, RISING);
+                    pulse_counter_rpc::pulse_handler, RISING);
   }
   int count_pulses(uint32_t duration_ms) {
     /* Start pulse counting and start count down timer to stop pulse counting
@@ -147,7 +147,7 @@ public:
      */
     // Disable pulse counting after duration of `delay_ms`.
     int timer_id = timer_.setTimeout(duration_ms,
-                                     &od_sensor_rpc::on_timeout);
+                                     &pulse_counter_rpc::on_timeout);
     start_pulse_count();
     return timer_id;
   }
@@ -171,7 +171,7 @@ public:
   }
 };
 
-}  // namespace od_sensor_rpc
+}  // namespace pulse_counter_rpc
 
 
 #endif  // #ifndef ___NODE__H___

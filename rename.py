@@ -65,4 +65,4 @@ def parse_args(args=None):
 
 if __name__ == '__main__':
     args = parse_args()
-    main('.', 'od-sensor-rpc', args.new_name)
+    main('.', 'pulse-counter-rpc', args.new_name)

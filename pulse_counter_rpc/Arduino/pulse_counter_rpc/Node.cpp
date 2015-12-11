@@ -1,6 +1,6 @@
 #include "Node.h"
 
-namespace od_sensor_rpc {
+namespace pulse_counter_rpc {
 
 void Node::begin() {
   config_.set_buffer(get_buffer());
@@ -27,4 +27,4 @@ void Node::set_i2c_address(uint8_t value) {
   config_._.i2c_address = address;
 }
 
-}  // namespace od_sensor_rpc
+}  // namespace pulse_counter_rpc

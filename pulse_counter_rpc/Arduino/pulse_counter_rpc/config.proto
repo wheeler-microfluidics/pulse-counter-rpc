@@ -1,4 +1,4 @@
-package od_sensor_rpc;
+package pulse_counter_rpc;
 
 message Config {
   /* # Configuration structure #
