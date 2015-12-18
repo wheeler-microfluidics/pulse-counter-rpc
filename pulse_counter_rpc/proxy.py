@@ -26,7 +26,7 @@ try:
             self._count_pulses = count_pulses
 
         def __count_pulses(self, pulse_pin, pulse_channel, duration_ms,
-                          trigger_direction=teensy.RISING, timeout_s=0):
+                           trigger_direction=teensy.RISING, timeout_s=0):
             '''
             Count the number of pulses that occur on a channel connected to an
             input pin within the specified duration.

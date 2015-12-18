@@ -33,9 +33,8 @@ PROPERTIES = OrderedDict([('package_name', package_name),
 LIB_PROPERTIES = PROPERTIES.copy()
 LIB_PROPERTIES.update(OrderedDict([('author', 'Christian Fobel'),
                                    ('author_email', 'christian@fobel.net'),
-                                   ('short_description', 'Template project '
-                                    'demonstrating use of Arduino base node '
-                                    'RPC framework.'),
+                                   ('short_description', 'Arduino-based pulse '
+                                    'counting firmware and Python driver.'),
                                    ('version', VERSION),
                                    ('long_description', ''),
                                    ('category', 'Communication'),
@@ -60,6 +59,7 @@ options(
                author_email='christian@fobel.net',
                url=URL,
                license='GPLv2',
-               install_requires=['base-node-rpc>=0.12.post11'],
+               install_requires=['base-node-rpc>=0.12.post11',
+                                 'arduino-helpers>=0.3.post16'],
                include_package_data=True,
                packages=[str(PROJECT_PREFIX)]))
