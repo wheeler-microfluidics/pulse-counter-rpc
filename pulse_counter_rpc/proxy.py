@@ -36,7 +36,7 @@ try:
             return State
 
         def __count_pulses(self, pulse_pin, pulse_channel, duration_ms,
-                           trigger_direction=teensy.RISING, timeout_s=0):
+                           trigger_direction=teensy.RISING):
             '''
             Count the number of pulses that occur on a channel connected to an
             input pin within the specified duration.
@@ -60,26 +60,17 @@ try:
             '''
             if self.state.pulse_count_enable:
                 raise IOError('Pulse count already in progress.')
-            if not self.update_state(pulse_channel=pulse_channel,
-                                     pulse_pin=pulse_pin,
-                                     pulse_direction=trigger_direction):
-                raise IOError('Error updating state.')
-            self._count_pulses(duration_ms)
 
-            # Wait for the expected duration.
-            time.sleep(duration_ms / 1e3)
+            # Set options for pulse count operation.
+            self.state = {'pulse_pin': pulse_pin,
+                          'pulse_channel': pulse_channel,
+                          'pulse_direction': trigger_direction}
+            self.start_pulse_count()
 
-            # Poll until pulse count is complete (or until timeout is reached).
-            start = datetime.now()
-            while timeout_s == 0 or ((datetime.now() - start).total_seconds() <
-                                     timeout_s):
-                state = self.state
-                if not state.pulse_count_enable:
-                    # Pulse counting has finished.
-                    return state.pulse_count
-            raise RuntimeError('Timed out waiting for pulse count to '
-                               'complete.')
+            # Wait for specified duration.
+            time.sleep(duration_ms * 1e-3)
 
+            return self.stop_pulse_count()
 
 
     class Proxy(ProxyMixin, _Proxy):
