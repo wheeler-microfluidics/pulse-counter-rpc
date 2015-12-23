@@ -85,7 +85,7 @@ public:
    * [1]: https://github.com/wheeler-microfluidics/arduino_rpc
    * [2]: https://github.com/wheeler-microfluidics/base_node_rpc
    */
-  void loop() { timer_.run(); }
+  void loop() {}
 
   bool on_config_mux_channel_a_pin_changed(uint32_t mux_channel_a_pin) {
     // Set pin mode for MUX A address channel pin to output.
