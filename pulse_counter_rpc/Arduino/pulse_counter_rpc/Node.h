@@ -23,6 +23,7 @@
 #include "pulse_counter_rpc_state_validate.h"
 #include "SimpleTimer.h"
 #include "PulseCounterRpc/config_pb.h"
+#include "PulseCounterRpc/state_pb.h"
 
 
 namespace pulse_counter_rpc {

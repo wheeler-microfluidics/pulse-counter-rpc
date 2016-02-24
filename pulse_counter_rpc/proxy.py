@@ -8,7 +8,8 @@ try:
     import arduino_helpers.hardware.teensy as teensy
     from .node import (Proxy as _Proxy, I2cProxy as _I2cProxy,
                        SerialProxy as _SerialProxy)
-    from .config import Config, State
+    from .config import Config
+    from .state import State
 
     class ProxyMixin(ConfigMixinBase, StateMixinBase):
         '''
