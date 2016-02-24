@@ -127,7 +127,7 @@ public:
      *
      *     pulse_pin (uint8_t) : Pin to count pulses on.
      */
-    if (state_._.pulse_pin >= 0) { detachInterrupt(state_._.pulse_pin); }
+    if (state_._.pulse_pin >= 0) { detachInterrupt(digitalPinToInterrupt(state_._.pulse_pin)); }
     pinMode(pulse_pin, INPUT);
     attachInterrupt(digitalPinToInterrupt(pulse_pin),
                     pulse_counter_rpc::pulse_handler, RISING);
