@@ -1,4 +1,3 @@
-![https://ci.appveyor.com/api/projects/status/github/wheeler-microfluidics/pulse-counter-rpc?branch=master&svg=true](https://ci.appveyor.com/api/projects/status/github/wheeler-microfluidics/pulse-counter-rpc?branch=master&svg=true)
 # pulse-counter-rpc #
 
 Template package for remote procedure call (RPC) project, utilizing
